@@ -7,6 +7,7 @@ import hiber.service.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainApp {
@@ -15,49 +16,40 @@ public class MainApp {
               new AnnotationConfigApplicationContext(AppConfig.class);
 
       UserService userService = context.getBean(UserService.class);
-      Car car1 = new Car("BMW", 3);
-      Car car2 = new Car("Audi", 8);
-      Car car3 = new Car("Mercedes", 500);
-      Car car4 = new Car("Lada", 7);
 
-      User user1 = new User("User1", "Lastname1", "user1@mail.ru");
-      user1.setCar(car1);
+      List<Car> cars = new ArrayList<>();
+      cars.add(new Car("BMW", 3));
+      cars.add(new Car("Audi", 8));
+      cars.add(new Car("Mercedes", 500));
+      cars.add(new Car("Lada", 7));
 
-      User user2 = new User("User2", "Lastname2", "user2@mail.ru");
-      user2.setCar(car2);
+      List<User> users = new ArrayList<>();
+      users.add(new User("User1", "Lastname1", "user1@mail.ru"));
+      users.add(new User("User2", "Lastname2", "user2@mail.ru"));
+      users.add(new User("User3", "Lastname3", "user3@mail.ru"));
+      users.add(new User("User4", "Lastname4", "user4@mail.ru"));
 
-      User user3 = new User("User3", "Lastname3", "user3@mail.ru");
-      user3.setCar(car3);
-
-      User user4 = new User("User4", "Lastname4", "user4@mail.ru");
-      user4.setCar(car4);
-
-      if (userService.getUserByCar("BMW", 3) == null) {
-         userService.add(user1);
+      for (int i = 0; i < users.size(); i++) {
+         users.get(i).setCar(cars.get(i));
       }
+      userService.addAll(users);
+      List<User> usersFromDb = userService.listUsers();
 
-      if (userService.getUserByCar("Audi", 8) == null) {
-         userService.add(user2);
+      System.out.println("=== Все пользователи из БД ===");
+      for (User user : usersFromDb) {
+         System.out.println(user);
       }
+      System.out.println("\n=== Поиск по машине ===");
 
-      if (userService.getUserByCar("Mercedes", 500) == null) {
-         userService.add(user3);
-      }
-
-      if (userService.getUserByCar("Lada", 7) == null) {
-         userService.add(user4);
-      }
-
-      List<User> users = userService.listUsers();
-      for (User user : users) {
-         System.out.println("Id = " + user.getId());
-         System.out.println("First Name = " + user.getFirstName());
-         System.out.println("Last Name = " + user.getLastName());
-         System.out.println("Email = " + user.getEmail());
-         System.out.println("Car = " + user.getCar());
-         System.out.println();
-      }
-      User found = userService.getUserByCar("BMW", 3);
-      System.out.println("Пользователь с машиной BMW 3: " + found);
+      userService.getUserByCar("BMW", 3)
+              .ifPresentOrElse(
+                      user -> System.out.println("Найден: " + user),
+                      () -> System.out.println("Пользователь с BMW 3 не найден")
+              );
+      userService.getUserByCar("Toyota", 2)
+              .ifPresentOrElse(
+                      user -> System.out.println("Найден: " + user),
+                      () -> System.out.println("Пользователь с Toyota 2 не найден")
+              );
    }
 }
