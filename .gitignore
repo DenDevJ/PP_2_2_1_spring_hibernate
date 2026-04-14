@@ -1,0 +1,35 @@
+# Compiled files
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+out/
+/shelf/
+/workspace.xml
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local configuration
+/dataSources/
+/dataSources.local.xml
+/queries/
+/httpRequests/
