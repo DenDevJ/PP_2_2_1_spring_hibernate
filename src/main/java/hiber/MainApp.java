@@ -17,39 +17,50 @@ public class MainApp {
 
       UserService userService = context.getBean(UserService.class);
 
+      List<User> users = new ArrayList<>();
+      users.add(new User("Иван", "Иванов", "ivan@mail.ru"));
+      users.add(new User("Пётр", "Петров", "petr@mail.ru"));
+      users.add(new User("Мария", "Сидорова", "maria@mail.ru"));
+      users.add(new User("Елена", "Кузнецова", "elena@mail.ru"));
+      users.add(new User("Алексей", "Смирнов", "alexey@mail.ru"));
+
+      for (User user : users) {
+         userService.add(user);
+      }
+
       List<Car> cars = new ArrayList<>();
       cars.add(new Car("BMW", 3));
       cars.add(new Car("Audi", 8));
       cars.add(new Car("Mercedes", 500));
       cars.add(new Car("Lada", 7));
+      cars.add(new Car("Toyota", 2));
 
-      List<User> users = new ArrayList<>();
-      users.add(new User("User1", "Lastname1", "user1@mail.ru"));
-      users.add(new User("User2", "Lastname2", "user2@mail.ru"));
-      users.add(new User("User3", "Lastname3", "user3@mail.ru"));
-      users.add(new User("User4", "Lastname4", "user4@mail.ru"));
-
-      for (int i = 0; i < users.size(); i++) {
-         users.get(i).setCar(cars.get(i));
+      for (Car car : cars) {
+         User tempUser = new User();
+         tempUser.setCar(car);
+         userService.add(tempUser);
       }
-      userService.addAll(users);
+
       List<User> usersFromDb = userService.listUsers();
 
-      System.out.println("=== Все пользователи из БД ===");
-      for (User user : usersFromDb) {
-         System.out.println(user);
+      List<Car> carsFromDb = new ArrayList<>();
+      for (Car car : cars) {
+         userService.getUserByCar(car.getModel(), car.getSeries())
+                 .ifPresent(user -> carsFromDb.add(user.getCar()));
       }
-      System.out.println("\n=== Поиск по машине ===");
 
-      userService.getUserByCar("BMW", 3)
-              .ifPresentOrElse(
-                      user -> System.out.println("Найден: " + user),
-                      () -> System.out.println("Пользователь с BMW 3 не найден")
-              );
-      userService.getUserByCar("Toyota", 2)
-              .ifPresentOrElse(
-                      user -> System.out.println("Найден: " + user),
-                      () -> System.out.println("Пользователь с Toyota 2 не найден")
-              );
+      for (User user : usersFromDb) {
+         if (user.getFirstName() == null) {
+            continue;
+         }
+      }
+
+      for (int i = 0; i < users.size() && i < carsFromDb.size(); i++) {
+         users.get(i).setCar(carsFromDb.get(i));
+         userService.add(users.get(i));
+      }
+
+      System.out.println("=== Результат ===");
+      userService.listUsers().forEach(System.out::println);
    }
 }

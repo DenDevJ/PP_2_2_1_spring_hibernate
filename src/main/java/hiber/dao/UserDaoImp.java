@@ -35,6 +35,18 @@ public class UserDaoImp implements UserDao {
    }
 
    @Override
+   public void update(User user) {
+      sessionFactory.getCurrentSession().update(user);
+   }
+
+   @Override
+   public void updateAll(List<User> users) {
+      for (User user : users) {
+         sessionFactory.getCurrentSession().update(user);
+      }
+   }
+
+   @Override
    public Optional<User> getUserById(Long id) {
       User user = sessionFactory.getCurrentSession().get(User.class, id);
       return Optional.ofNullable(user);
