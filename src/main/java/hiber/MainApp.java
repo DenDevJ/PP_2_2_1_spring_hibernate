@@ -3,64 +3,64 @@ package hiber;
 import hiber.config.AppConfig;
 import hiber.model.Car;
 import hiber.model.User;
+import hiber.service.CarService;
 import hiber.service.UserService;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainApp {
    public static void main(String[] args) {
-      ApplicationContext context =
+
+      AnnotationConfigApplicationContext context =
               new AnnotationConfigApplicationContext(AppConfig.class);
 
       UserService userService = context.getBean(UserService.class);
+      CarService carService = context.getBean(CarService.class);
 
-      List<User> users = new ArrayList<>();
-      users.add(new User("Иван", "Иванов", "ivan@mail.ru"));
-      users.add(new User("Пётр", "Петров", "petr@mail.ru"));
-      users.add(new User("Мария", "Сидорова", "maria@mail.ru"));
-      users.add(new User("Елена", "Кузнецова", "elena@mail.ru"));
-      users.add(new User("Алексей", "Смирнов", "alexey@mail.ru"));
+      System.out.println("\n=== ШАГ 1: Сохранение юзеров ===");
+      List<User> users = Arrays.asList(
+              new User("Иван", "Петров", "ivan@mail.com"),
+              new User("Мария", "Сидорова", "maria@mail.com"),
+              new User("Алексей", "Иванов", "alex@mail.com")
+      );
+      userService.saveUsers(users);
+      System.out.println("✅ Сохранено юзеров: " + users.size());
 
-      for (User user : users) {
-         userService.add(user);
+      System.out.println("\n=== ШАГ 2: Сохранение машин ===");
+      List<Car> cars = Arrays.asList(
+              new Car("BMW", 5),
+              new Car("Audi", 3),
+              new Car("Mercedes", 7),
+              new Car("Toyota", 2)
+      );
+      carService.saveCars(cars);
+      System.out.println("✅ Сохранено машин: " + cars.size());
+
+      System.out.println("\n=== ШАГ 3: Загрузка из БД ===");
+      List<User> usersFromDb = userService.getAllUsers();
+      List<Car> carsFromDb = carService.getAllCars();
+      System.out.println("📥 Загружено юзеров: " + usersFromDb.size());
+      System.out.println("📥 Загружено машин: " + carsFromDb.size());
+
+      System.out.println("\n=== ШАГ 4: Раздача машин юзерам ===");
+      for (int i = 0; i < usersFromDb.size(); i++) {
+         User user = usersFromDb.get(i);
+         Car car = carsFromDb.get(i % carsFromDb.size());
+         user.addCar(car);
+         System.out.println("🔗 " + user.getFirstName() + " получил " + car.getModel());
       }
 
-      List<Car> cars = new ArrayList<>();
-      cars.add(new Car("BMW", 3));
-      cars.add(new Car("Audi", 8));
-      cars.add(new Car("Mercedes", 500));
-      cars.add(new Car("Lada", 7));
-      cars.add(new Car("Toyota", 2));
+      System.out.println("\n=== ШАГ 5: Сохранение юзеров с машинами ===");
+      userService.updateUsers(usersFromDb);
+      System.out.println("✅ Юзеры с машинами сохранены");
 
-      for (Car car : cars) {
-         User tempUser = new User();
-         tempUser.setCar(car);
-         userService.add(tempUser);
+      System.out.println("\n=== ФИНАЛЬНЫЙ РЕЗУЛЬТАТ ===");
+      List<User> finalUsers = userService.getAllUsers();
+      for (User user : finalUsers) {
+         System.out.println(user);
       }
 
-      List<User> usersFromDb = userService.listUsers();
-
-      List<Car> carsFromDb = new ArrayList<>();
-      for (Car car : cars) {
-         userService.getUserByCar(car.getModel(), car.getSeries())
-                 .ifPresent(user -> carsFromDb.add(user.getCar()));
-      }
-
-      for (User user : usersFromDb) {
-         if (user.getFirstName() == null) {
-            continue;
-         }
-      }
-
-      for (int i = 0; i < users.size() && i < carsFromDb.size(); i++) {
-         users.get(i).setCar(carsFromDb.get(i));
-         userService.add(users.get(i));
-      }
-
-      System.out.println("=== Результат ===");
-      userService.listUsers().forEach(System.out::println);
+      context.close();
    }
 }

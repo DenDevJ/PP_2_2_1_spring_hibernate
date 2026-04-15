@@ -5,55 +5,31 @@ import hiber.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImp implements UserService {
 
+   private final UserDao userDao;
+
    @Autowired
-   private UserDao userDao;
-
-   @Override
-   @Transactional
-   public void add(User user) {
-      userDao.add(user);
+   public UserServiceImp(UserDao userDao) {
+      this.userDao = userDao;
    }
 
    @Override
-   @Transactional
-   public void addAll(List<User> users) {
-      userDao.addAll(users);
+   public void saveUsers(List<User> users) {
+      userDao.saveAll(users);
    }
 
    @Override
-   @Transactional(readOnly = true)
-   public List<User> listUsers() {
-      return userDao.listUsers();
+   public List<User> getAllUsers() {
+      return userDao.findAll();
    }
 
    @Override
-   @Transactional
-   public void update(User user) {
-      userDao.update(user);
-   }
-
-   @Override
-   @Transactional
-   public void updateAll(List<User> users) {
+   public void updateUsers(List<User> users) {
       userDao.updateAll(users);
-   }
-
-   @Override
-   @Transactional(readOnly = true)
-   public Optional<User> getUserById(Long id) {
-      return userDao.getUserById(id);
-   }
-
-   @Override
-   @Transactional(readOnly = true)
-   public Optional<User> getUserByCar(String model, int series) {
-      return userDao.getUserByCar(model, series);
    }
 }

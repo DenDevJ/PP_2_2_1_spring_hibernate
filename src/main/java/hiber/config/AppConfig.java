@@ -19,7 +19,7 @@ import java.util.Properties;
 @Configuration
 @PropertySource("classpath:db.properties")
 @EnableTransactionManagement
-@ComponentScan(value = "hiber")
+@ComponentScan(basePackages = "hiber")  // ← Убедитесь, что эта строка есть
 public class AppConfig {
 
    @Autowired
